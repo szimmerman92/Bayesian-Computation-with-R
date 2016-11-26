@@ -1,0 +1,134 @@
+---
+title: "Bayesian Computation with R"
+author: "Daniel Pique"
+date: "November 30, 2016"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+### Question 3.7 - Learning about a mortality rate using a mixture prior 
+In the heart transplant surgery example in Section 3.3, suppose you are
+interested in estimating the mortality rate for a particular hospital.
+To construct your prior, you talk to two experts. The first experts
+beliefs about are described by a gamma(1.5, 1000) distribution
+and the second experts beliefs are described by a gamma(7, 1000)
+distribution. You place equal credence in both experts, so your
+prior beliefs are represented by the mixture prior
+
+$$g(\lambda)= .5g_1(\lambda)+ .5g_2(\lambda) ,$$
+
+where g1 and g2 are respectively the gamma(1.5, 1000) and
+gamma(7, 1000) distributions. 
+
+##### A) Using the curve function, construct a graph of the prior density for $\lambda$.
+
+  First, recall the gamma probability density function: $$f(x; \alpha, \beta)=x^{\alpha-1}e^{-\beta x} \dfrac{\beta^{\alpha}}{\Gamma(\alpha)},\, for\, x>0  $$  
+
+$\alpha$ is the shape parameter, and $\beta$ is the rate parameter. $E[x] = \dfrac{\alpha}{\beta}, \: Var[x] = \dfrac{\alpha}{\beta^2}$
+
+```{r, echo=TRUE}
+
+library(LearnBayes)
+prior_3.7a <- function(x){
+  0.5*dgamma(x, 1.5, 1000) + 0.5*dgamma(x, 7, 1000)
+}
+curve(expr = c(prior_3.7a(x)), ylab = "f(x)")
+```
+
+##### B) Suppose this hospital experiences $y_{obs} = 4$ deaths with an exposure of $e = 1767$. Using the function **poisson.gamma.mix** in the LearnBayes package, compute the posterior distribution of $\lambda$. The inputs to this function are similar to the inputs to the function binomial.beta.mix described in Section 3.5.
+
+```{r}
+probs=c(.5, .5)
+gamma.par1=c(1.5,1000)
+gamma.par2=c(7,1000)
+gammapar=rbind(gamma.par1,gamma.par2)
+data=list(y=4,t=1767)
+post <- poisson.gamma.mix(probs,gammapar,data)
+post
+```
+Thus, the posterior is defined as $$g(\lambda) = `r round(post$probs[1],2)`gamma(\lambda;\alpha = `r post$gammapar["gamma.par1",1]`, \beta = `r post$gammapar["gamma.par1",2]`) + `r round(post$probs[2],2)`gamma(\lambda;\alpha = `r post$gammapar["gamma.par2",1]`, \beta = `r post$gammapar["gamma.par2",2]`)   $$
+Compare this with the prior distribution:
+$$g(\lambda) = 0.5gamma(\lambda;\alpha = 1.5, \beta = 1000) + 0.5gamma(\lambda;\alpha = 7, \beta = 1000) $$
+
+##### C) Plot the prior and posterior densities of $\lambda$ on the same graph.
+```{r, echo=TRUE}
+post_3.7b <- function(x){
+  post$probs[1]*dgamma(x, post$gammapar["gamma.par1",1], 
+                       post$gammapar["gamma.par1",2]) + 
+    post$probs[2]*dgamma(x, post$gammapar["gamma.par2",1], post$gammapar["gamma.par2",2])
+}
+plot.new()
+curve(expr = c(prior_3.7a(x)), ylab = "f(x)")
+curve(expr = c(post_3.7b(x)), add=T, col = "red") #posterior is in red
+```
+
+##### D) Find the probability that the mortality rate $\lambda$ exceeds .005.
+
+```{r}
+#posterior distribution
+post_3.7b_prExceed <- function(x){ #just change dgamma for pgamma 
+                                #(density to the left) and subtract 1
+  1 - {post$probs[1]*pgamma(x, post$gammapar["gamma.par1",1], 
+                     post$gammapar["gamma.par1",2]) + 
+  post$probs[2]*pgamma(x, post$gammapar["gamma.par2",1], post$gammapar["gamma.par2",2])}
+}
+
+curve(post_3.7b_prExceed(x))
+round(post_3.7b_prExceed(0.005), 4)
+
+
+```
+
+
+##### E) Based on the mixing probabilities, were the data more consistent with the beliefs of the first expert or the beliefs of the second expert? Explain.
+
+- The mixing probabilities increased for the first expert when comparing the prior to the posterior (0.5 to `r round(post$probs[1],3)`) and decreased for the second expert (0.5 to `r round(post$probs[2],3)`. Thus, in the posterior distribution, more 'weight' is placed on the mixture associated with the first expert. This reflects the fact that the data are more consistent with the beliefs of the first expert.
+
+
+### Question 3.8 - Learning about an exponential mean based on selected data 
+- In the scenario of Exercise 2, suppose we are testing 12 light bulbs from an exponential distribution with mean $\lambda$. Unfortunately, although all light
+bulbs are tested, one only observes that the fourth smallest burn time, y4 is 100 hours, and the eighth smallest burn time, y8, is 300 hours. The likelihood function given these selected data is equal to:
+
+$$L(\lambda) \propto F(100; \lambda)^3f(100; \lambda)(F(300; \lambda) - F(100; \lambda)^3f(300; \lambda)(1 - F(300; \lambda))^4,$$
+
+where $f(y; \lambda)$ and $F(y; \lambda)$ are, respectively, the density function and cumulative distribution function for an exponential random variable with mean $\lambda$. An R script to compute this likelihood follows:
+LIKE = pexp(100,1/lambda)^3*dexp(100,1/lambda)* (pexp(300,1/lambda)-pexp(100,1/lambda))^3* dexp(300,1/lambda)*(1-pexp(300,1/lambda))^4
+
+##### a) Suppose $\lambda$ is assigned the standard noninformative prior proportional to 1/??. Plot the posterior distribution.
+
+```{r}
+lambda = seq(1,1000, by = 1)
+PRIOR = {1/lambda} / sum(1/lambda)#non-informative prior proportional to 1/lambda
+plot(lambda, PRIOR, main = "Prior")
+
+
+LIKE = pexp(100,1/lambda)^3*dexp(100,1/lambda)* (pexp(300,1/lambda)-pexp(100,1/lambda))^3* dexp(300,1/lambda)*(1-pexp(300,1/lambda))^4
+
+
+plot(lambda, LIKE, main = "Likelihood")
+
+post3.8 <- LIKE * PRIOR / sum(LIKE * PRIOR)
+plot(lambda, post3.8, main = "Posterior")
+
+
+
+```
+
+
+##### b) Compute the posterior mean and standard deviation for $\lambda$. 
+
+```{r}
+mean_post <- sum(post3.8*lambda)/sum(post3.8)
+mean_post #327.22
+
+std_dev_post <- sqrt ( sum(post3.8 * (lambda - mean_post)^2) / sum(post3.8) )
+std_dev_post #127.67
+```
+
+#####c) Find the probability that the mean lifetime is between 300 and 500 hours.
+```{r}
+sum(post3.8[300:500])
+
+```
+
