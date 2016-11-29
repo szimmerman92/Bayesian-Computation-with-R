@@ -1,8 +1,8 @@
 ---
 title: "Bayesian Computation with R"
-author: "Daniel Pique"
+author: "Daniel Piqué"
 date: "November 30, 2016"
-output: github_document
+output: html_document#github_document
 ---
 
 ### Question 3.7 - Learning about a mortality rate using a mixture prior 
@@ -31,7 +31,7 @@ library(LearnBayes)
 prior_3.7a <- function(x){
   0.5*dgamma(x, 1.5, 1000) + 0.5*dgamma(x, 7, 1000)
 }
-curve(expr = c(prior_3.7a(x)), ylab = "f(x)")
+curve(expr = c(prior_3.7a(x)), ylab = "f(x)", xlab = "lambda", xlim = c(0, 0.02))
 ```
 
 ##### B) Suppose this hospital experiences $y_{obs} = 4$ deaths with an exposure of $e = 1767$. Using the function **poisson.gamma.mix** in the LearnBayes package, compute the posterior distribution of $\lambda$. The inputs to this function are similar to the inputs to the function binomial.beta.mix described in Section 3.5.
@@ -57,7 +57,7 @@ post_3.7b <- function(x){
     post$probs[2]*dgamma(x, post$gammapar["gamma.par2",1], post$gammapar["gamma.par2",2])
 }
 plot.new()
-curve(expr = c(prior_3.7a(x)), ylab = "f(x)")
+curve(expr = c(prior_3.7a(x)), ylab = "f(x)", xlim = c(0,0.02), ylim = c(0, 400), xlab= "lambda")
 curve(expr = c(post_3.7b(x)), add=T, col = "red") #posterior is in red
 ```
 
@@ -72,9 +72,8 @@ post_3.7b_prExceed <- function(x){ #just change dgamma for pgamma
   post$probs[2]*pgamma(x, post$gammapar["gamma.par2",1], post$gammapar["gamma.par2",2])}
 }
 
-curve(post_3.7b_prExceed(x))
+#curve(post_3.7b_prExceed(x))
 round(post_3.7b_prExceed(0.005), 4)
-
 
 ```
 
