@@ -2,7 +2,7 @@
 title: "Bayesian Computation with R"
 author: "Daniel Piqué"
 date: "November 30, 2016"
-output: github_document
+output: html_document
 ---
 
 ### Question 3.7 - Learning about a mortality rate using a mixture prior 
@@ -92,7 +92,7 @@ $$L(\lambda) \propto F(100; \lambda)^3f(100; \lambda)(F(300; \lambda) - F(100; \
 where $f(y; \lambda)$ and $F(y; \lambda)$ are, respectively, the density function and cumulative distribution function for an exponential random variable with mean $\lambda$. An R script to compute this likelihood follows:
 LIKE = pexp(100,1/lambda)^3*dexp(100,1/lambda)* (pexp(300,1/lambda)-pexp(100,1/lambda))^3* dexp(300,1/lambda)*(1-pexp(300,1/lambda))^4
 
-##### a) Suppose $\lambda$ is assigned the standard noninformative prior proportional to 1/??. Plot the posterior distribution.
+##### a) Suppose $\lambda$ is assigned the standard noninformative prior proportional to 1/$\lambda$. Plot the posterior distribution.
 
 ```{r}
 lambda = seq(1,1000, by = 1)
