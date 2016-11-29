@@ -2,7 +2,7 @@
 title: "Bayesian Computation with R"
 author: "Daniel Piqué"
 date: "November 30, 2016"
-output: html_document#github_document
+output: github_document
 ---
 
 ### Question 3.7 - Learning about a mortality rate using a mixture prior 
