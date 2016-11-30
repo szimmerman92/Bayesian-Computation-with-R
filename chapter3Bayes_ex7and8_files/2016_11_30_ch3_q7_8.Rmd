@@ -120,6 +120,11 @@ std_dev_post #127.67
 
 #####c) Find the probability that the mean lifetime is between 300 and 500 hours.
 ```{r}
+#Two ways of interpreting the question:
+#1. 
+sum(post3.8[300:500])
+
+#2.
 #plot the original exoonential distribution with mean equal to "mean_post"
 cord.x <- c(300,seq(300,500,0.1),500) 
 cord.y <- c(0,dexp(seq(300,500,0.1), 1/mean_post),0) 

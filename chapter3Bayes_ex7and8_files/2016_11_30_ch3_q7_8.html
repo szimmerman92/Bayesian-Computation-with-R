@@ -225,7 +225,12 @@ std_dev_post #127.67</code></pre>
 </div>
 <div id="c-find-the-probability-that-the-mean-lifetime-is-between-300-and-500-hours." class="section level5">
 <h5>c) Find the probability that the mean lifetime is between 300 and 500 hours.</h5>
-<pre class="r"><code>#plot the original exoonential distribution with mean equal to &quot;mean_post&quot;
+<pre class="r"><code>#Two ways of interpreting the question:
+#1. 
+sum(post3.8[300:500])</code></pre>
+<pre><code>## [1] 0.4080505</code></pre>
+<pre class="r"><code>#2.
+#plot the original exoonential distribution with mean equal to &quot;mean_post&quot;
 cord.x &lt;- c(300,seq(300,500,0.1),500) 
 cord.y &lt;- c(0,dexp(seq(300,500,0.1), 1/mean_post),0) 
 curve(dexp(x, 1/mean_post), xlim = c(0.1, 1000), xlab = &quot;x&quot;, main = &quot;exp(lambda)&quot;)
