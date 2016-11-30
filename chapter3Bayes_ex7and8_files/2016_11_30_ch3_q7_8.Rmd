@@ -87,29 +87,23 @@ round(post_3.7b_prExceed(0.005), 4)
 - In the scenario of Exercise 2, suppose we are testing 12 light bulbs from an exponential distribution with mean $\lambda$. Unfortunately, although all light
 bulbs are tested, one only observes that the fourth smallest burn time, y4 is 100 hours, and the eighth smallest burn time, y8, is 300 hours. The likelihood function given these selected data is equal to:
 
-$$L(\lambda) \propto F(100; \lambda)^3f(100; \lambda)(F(300; \lambda) - F(100; \lambda)^3f(300; \lambda)(1 - F(300; \lambda))^4,$$
+$$L(\lambda) \propto F(100; \lambda)^3f(100; \lambda)(F(300; \lambda) - F(100; \lambda))^3f(300; \lambda)(1 - F(300; \lambda))^4,$$
 
 where $f(y; \lambda)$ and $F(y; \lambda)$ are, respectively, the density function and cumulative distribution function for an exponential random variable with mean $\lambda$. An R script to compute this likelihood follows:
 LIKE = pexp(100,1/lambda)^3*dexp(100,1/lambda)* (pexp(300,1/lambda)-pexp(100,1/lambda))^3* dexp(300,1/lambda)*(1-pexp(300,1/lambda))^4
 
 ##### a) Suppose $\lambda$ is assigned the standard noninformative prior proportional to 1/$\lambda$. Plot the posterior distribution.
 
-```{r}
-lambda = seq(1,1000, by = 1)
-PRIOR = {1/lambda} / sum(1/lambda)#non-informative prior proportional to 1/lambda
-plot(lambda, PRIOR, main = "Prior")
+- Note that the exponential distribution is used to model the time until a given event occurs. The one parameter (lambda) of the exponential distribution that we are trying to estimate gives us an equation for describing the distribution of the burn times for the 12 light bulbs. Note that if the mean of the exponential random variable is lambda, then the parameter of the exponential distribution is 1/lambda.
 
+```{r}
+lambda = seq(1,1000, by = 1) 
+PRIOR = {1/lambda} / sum(1/lambda)#non-informative prior proportional to 1/lambda
 
 LIKE = pexp(100,1/lambda)^3*dexp(100,1/lambda)* (pexp(300,1/lambda)-pexp(100,1/lambda))^3* dexp(300,1/lambda)*(1-pexp(300,1/lambda))^4
 
-
-plot(lambda, LIKE, main = "Likelihood")
-
 post3.8 <- LIKE * PRIOR / sum(LIKE * PRIOR)
 plot(lambda, post3.8, main = "Posterior")
-
-
-
 ```
 
 
@@ -121,11 +115,19 @@ mean_post #327.22
 
 std_dev_post <- sqrt ( sum(post3.8 * (lambda - mean_post)^2) / sum(post3.8) )
 std_dev_post #127.67
+
 ```
 
 #####c) Find the probability that the mean lifetime is between 300 and 500 hours.
 ```{r}
-sum(post3.8[300:500])
+#plot the original exoonential distribution with mean equal to "mean_post"
+cord.x <- c(300,seq(300,500,0.1),500) 
+cord.y <- c(0,dexp(seq(300,500,0.1), 1/mean_post),0) 
+curve(dexp(x, 1/mean_post), xlim = c(0.1, 1000), xlab = "x", main = "exp(lambda)")
+polygon(cord.x,cord.y,col='blue')
+
+prob_300_500 <- pexp(500, 1/mean_post) - pexp(300, 1/mean_post)
+prob_300_500
 
 ```
 
